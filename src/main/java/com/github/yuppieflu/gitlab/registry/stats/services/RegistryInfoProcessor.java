@@ -4,6 +4,7 @@ import com.github.yuppieflu.gitlab.registry.stats.domain.Image;
 import com.github.yuppieflu.gitlab.registry.stats.domain.Registry;
 import com.github.yuppieflu.gitlab.registry.stats.domain.RegistryInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.List;
 public class RegistryInfoProcessor {
 
     private final UrlBuilder urlBuilder;
-    private final TraversingRestTemplate<Image> restTemplate = new TraversingRestTemplate<>();
+    private final TraversingRestTemplate<Image> restTemplate = new TraversingRestTemplate<>(
+            new ParameterizedTypeReference<List<Image>>() {});
 
     public RegistryInfo registryInfo(Registry registry) {
         List<Image> images = restTemplate.getList(page -> urlBuilder.buildRegistryTagsUri(registry.getTagsPath(), page));

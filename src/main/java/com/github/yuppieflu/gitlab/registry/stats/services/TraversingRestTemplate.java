@@ -1,5 +1,6 @@
 package com.github.yuppieflu.gitlab.registry.stats.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -8,7 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
@@ -17,11 +17,14 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
+@RequiredArgsConstructor
 public class TraversingRestTemplate<T> {
 
     private static final String TOTAL_PAGES_HEADER = "X-Total-Pages";
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    private final ParameterizedTypeReference<List<T>> typeReference;
 
     public List<T> getList(IntFunction<String> pageUrlProvider) {
         ResponseEntity<List<T>> response = restTemplate.exchange(
@@ -38,13 +41,13 @@ public class TraversingRestTemplate<T> {
                         .map(this::processPage)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .flatMap(Collection::stream)
+                        .flatMap(List::stream)
                         .collect(toList());
     }
 
     private Optional<List<T>> processPage(String pageUrl) {
         ResponseEntity<List<T>> pageResp = restTemplate.exchange(
-                pageUrl, HttpMethod.GET, HttpEntity.EMPTY, new ParameterizedTypeReference<List<T>>() {});
+                pageUrl, HttpMethod.GET, HttpEntity.EMPTY, typeReference);
         return Optional.ofNullable(pageResp.getBody());
     }
 

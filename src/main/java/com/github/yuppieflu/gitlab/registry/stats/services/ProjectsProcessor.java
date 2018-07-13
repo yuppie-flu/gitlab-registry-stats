@@ -1,12 +1,13 @@
 package com.github.yuppieflu.gitlab.registry.stats.services;
 
 import com.github.yuppieflu.gitlab.registry.stats.domain.Project;
-import com.github.yuppieflu.gitlab.registry.stats.domain.RegistryInfo;
+import com.github.yuppieflu.gitlab.registry.stats.jpa.entities.RegInfo;
+import com.github.yuppieflu.gitlab.registry.stats.jpa.repository.RegInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,10 +16,12 @@ import java.util.Optional;
 @Slf4j
 public class ProjectsProcessor {
 
-    private final TraversingRestTemplate<Project> projectsRestTemplate = new TraversingRestTemplate<>();
+    private final TraversingRestTemplate<Project> projectsRestTemplate =
+            new TraversingRestTemplate<>(new ParameterizedTypeReference<List<Project>>() {});
     private final UrlBuilder urlBuilder;
     private final RegistryProcessor registryProcessor;
     private final RegistryInfoProcessor registryInfoProcessor;
+    private final RegInfoRepository regInfoRepository;
 
     private int numberOfProjects = 0;
     private int currentProject = 0;
@@ -37,7 +40,7 @@ public class ProjectsProcessor {
                    .filter(Optional::isPresent)
                    .map(Optional::get)
                    .map(registryInfoProcessor::registryInfo)
-                   .sorted(Comparator.comparingLong(RegistryInfo::getTotalSizeBytes).reversed())
-                   .forEach(info -> log.info("[{}]", info));
+                   .map(RegInfo::new)
+                   .forEach(regInfoRepository::save);
     }
 }

@@ -4,9 +4,11 @@ import com.github.yuppieflu.gitlab.registry.stats.domain.Project;
 import com.github.yuppieflu.gitlab.registry.stats.domain.Registry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -14,7 +16,8 @@ import java.util.Optional;
 @Slf4j
 public class RegistryProcessor {
 
-    private final SimpleListRestTemplate<Registry> registryRestTemplate = new SimpleListRestTemplate<>();
+    private final SimpleListRestTemplate<Registry> registryRestTemplate = new SimpleListRestTemplate<>(
+            new ParameterizedTypeReference<List<Registry>>() {});
 
     private final UrlBuilder urlBuilder;
 
