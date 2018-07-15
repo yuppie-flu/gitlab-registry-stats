@@ -1,10 +1,11 @@
 package com.github.yuppieflu.gitlab.registry.stats.services;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
+@RequiredArgsConstructor
 public class UrlBuilder {
 
     private static final String API_PROJECTS_PATH = "/api/v4/projects";
@@ -15,35 +16,17 @@ public class UrlBuilder {
 
     private static final String CONTAINER_REGISTRY_PATH_SEGMENT = "container_registry.json";
 
-    private final String host;
-    private final int port;
-    private final String scheme;
-    private final String token;
-    private final int projectsPerPage;
-
-    public UrlBuilder(
-            @Value("${gitlab.host}") String host,
-            @Value("${gitlab.port:443}") int port,
-            @Value("${gitlab.scheme:https}") String scheme,
-            @Value("${gitlab.token}") String token,
-            @Value("${gitlab.projects-per-page:25}") int projectsPerPage
-    ) {
-        this.host = host;
-        this.port = port;
-        this.scheme = scheme;
-        this.token = token;
-        this.projectsPerPage = projectsPerPage;
-    }
+    private final GitlabProperties gitlabProperties;
 
     public String buildProjectsUri(int page) {
         return UriComponentsBuilder.newInstance()
-                                   .scheme(scheme)
-                                   .host(host)
-                                   .port(port)
+                                   .scheme(gitlabProperties.getScheme())
+                                   .host(gitlabProperties.getHost())
+                                   .port(gitlabProperties.getPort())
                                    .path(API_PROJECTS_PATH)
-                                   .queryParam(TOKEN_QUERY_PARAM, token)
+                                   .queryParam(TOKEN_QUERY_PARAM, gitlabProperties.getToken())
                                    .queryParam(PAGE_QUERY_PARAM, page)
-                                   .queryParam(PER_PAGE_QUERY_PARAM, projectsPerPage)
+                                   .queryParam(PER_PAGE_QUERY_PARAM, gitlabProperties.getProjectsPerPage())
                                    .build()
                                    .toUriString();
     }
@@ -51,19 +34,19 @@ public class UrlBuilder {
     public String buildContainerRegistryUri(String projectUrl) {
          return UriComponentsBuilder.fromUriString(projectUrl)
                                    .pathSegment(CONTAINER_REGISTRY_PATH_SEGMENT)
-                                   .queryParam(TOKEN_QUERY_PARAM, token)
+                                   .queryParam(TOKEN_QUERY_PARAM, gitlabProperties.getToken())
                                    .build()
                                    .toUriString();
     }
 
     public String buildRegistryTagsUri(String tagsPathSegment, int page) {
          return UriComponentsBuilder.fromUriString(tagsPathSegment)
-                                   .scheme(scheme)
-                                   .host(host)
-                                   .port(port)
-                                   .queryParam(TOKEN_QUERY_PARAM, token)
+                                    .scheme(gitlabProperties.getScheme())
+                                    .host(gitlabProperties.getHost())
+                                    .port(gitlabProperties.getPort())
+                                    .queryParam(TOKEN_QUERY_PARAM, gitlabProperties.getToken())
                                     .queryParam(PAGE_QUERY_PARAM, page)
-                                   .build()
-                                   .toUriString();
+                                    .build()
+                                    .toUriString();
     }
 }
