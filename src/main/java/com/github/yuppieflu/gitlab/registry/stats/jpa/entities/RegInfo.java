@@ -7,11 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "project_registry_info")
 @Data
+@Entity
+@Table(name = "project_registry_info",
+        indexes =  {
+            @Index(name = "unique_name", columnList = "name", unique = true)
+        })
 public class RegInfo {
 
     @Id
@@ -28,5 +32,11 @@ public class RegInfo {
         this.name = registryInfo.getName();
         this.images = registryInfo.getNumberOfImages();
         this.totalSizeBytes = registryInfo.getTotalSizeBytes();
+    }
+
+    public RegInfo setData(RegInfo other) {
+        this.images = other.images;
+        this.totalSizeBytes = other.totalSizeBytes;
+        return this;
     }
 }

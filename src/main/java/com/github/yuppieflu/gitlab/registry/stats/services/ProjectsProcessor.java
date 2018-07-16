@@ -41,6 +41,14 @@ public class ProjectsProcessor {
                    .map(Optional::get)
                    .map(registryInfoProcessor::registryInfo)
                    .map(RegInfo::new)
-                   .forEach(regInfoRepository::save);
+                   .forEach(this::saveOrUpdate);
+    }
+
+    private void saveOrUpdate(RegInfo regInfo) {
+        RegInfo toSaveOrUpdate = regInfoRepository.findByName(regInfo.getName())
+                                                  .map(r -> r.setData(regInfo))
+                                                  .orElse(regInfo);
+        regInfoRepository.save(toSaveOrUpdate);
+
     }
 }
